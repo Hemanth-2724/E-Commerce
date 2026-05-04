@@ -1,7 +1,9 @@
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\AuthCheckServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\CartServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\LoginServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\OrderServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\ProductServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\ProfileServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\RegisterServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\TestServlet.java
 E:\EcommerceApp\backend\src\main\java\com\ecommerce\dao\CartDAO.java

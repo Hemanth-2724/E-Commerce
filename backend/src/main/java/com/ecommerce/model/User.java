@@ -1,8 +1,10 @@
 package com.ecommerce.model;
 
-public class User {
+import java.io.Serializable;
 
-    private int userId;
+public class User implements Serializable {
+
+    private int    userId;
     private String fullName;
     private String email;
     private String phone;
@@ -10,25 +12,24 @@ public class User {
     private String gender;
     private String address;
 
-    // Getters & Setters
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public int    getUserId()          { return userId; }
+    public void   setUserId(int v)     { this.userId = v; }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getFullName()          { return fullName; }
+    public void   setFullName(String v)  { this.fullName = v; }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getEmail()             { return email; }
+    public void   setEmail(String v)     { this.email = v; }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getPhone()             { return phone; }
+    public void   setPhone(String v)     { this.phone = v; }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPassword()          { return password; }
+    public void   setPassword(String v)  { this.password = v; }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    public String getGender()            { return gender; }
+    public void   setGender(String v)    { this.gender = v; }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getAddress()           { return address; }
+    public void   setAddress(String v)   { this.address = v; }
 }

@@ -11,53 +11,94 @@ import com.ecommerce.dao.CartDAO;
 import com.ecommerce.dao.OrderDAO;
 import com.ecommerce.model.CartItem;
 import com.ecommerce.model.Order;
+import com.ecommerce.model.User;
 import com.google.gson.Gson;
 
 @WebServlet("/checkout")
 public class OrderServlet extends HttpServlet {
 
+    private void setCorsHeaders(HttpServletResponse res) {
+        res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    // POST /checkout  → place order from cart
+    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setContentType("application/json;charset=UTF-8");
 
-        res.setHeader("Access-Control-Allow-Origin", "*");
-
-        int userId = 1;
-
-        CartDAO cartDAO = new CartDAO();
-        List<CartItem> items = cartDAO.getCartItems(userId);
-
-        double total = 0;
-        for (CartItem item : items) {
-            total += item.getQuantity() * item.getUnitPrice();
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.getWriter().print("{\"error\":\"Not authenticated\"}");
+            return;
         }
 
-        OrderDAO dao = new OrderDAO();
-        boolean status = dao.placeOrder(userId, items, total);
+        User user = (User) session.getAttribute("user");
+        String deliveryAddress = req.getParameter("deliveryAddress");
+        String paymentMethod   = req.getParameter("paymentMethod") != null ? req.getParameter("paymentMethod") : "COD";
 
-        if (status) {
-            res.getWriter().println("Order Placed ✅");
+        CartDAO cartDAO = new CartDAO();
+        List<CartItem> items = cartDAO.getCartItems(user.getUserId());
+
+        if (items.isEmpty()) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            res.getWriter().print("{\"error\":\"Cart is empty\"}");
+            return;
+        }
+
+        double total = 0;
+        for (CartItem item : items) total += item.getSubtotal();
+
+        OrderDAO dao = new OrderDAO();
+        boolean ok = dao.placeOrder(user.getUserId(), items, total, paymentMethod,
+                deliveryAddress != null ? deliveryAddress : user.getAddress());
+
+        if (ok) {
+            cartDAO.clearCart(user.getUserId());
+            res.getWriter().print("{\"success\":true,\"message\":\"Order placed successfully!\"}");
         } else {
-            res.getWriter().println("Order Failed ❌");
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            res.getWriter().print("{\"error\":\"Failed to place order\"}");
         }
     }
 
+    // GET /checkout              → list orders for user
+    // GET /checkout?orderId=X    → items of a specific order
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setContentType("application/json;charset=UTF-8");
 
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setContentType("application/json");
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.getWriter().print("{\"error\":\"Not authenticated\"}");
+            return;
+        }
 
-        int userId = 1;
+        User user = (User) session.getAttribute("user");
         String orderId = req.getParameter("orderId");
-
         OrderDAO dao = new OrderDAO();
         Gson gson = new Gson();
 
         if (orderId != null) {
-            List<CartItem> items = dao.getOrderItems(Integer.parseInt(orderId));
+            List<CartItem> items = dao.getOrderItems(Integer.parseInt(orderId), user.getUserId());
             res.getWriter().print(gson.toJson(items));
         } else {
-            List<Order> orders = dao.getOrdersByUser(userId);
+            List<Order> orders = dao.getOrdersByUser(user.getUserId());
             res.getWriter().print(gson.toJson(orders));
         }
     }

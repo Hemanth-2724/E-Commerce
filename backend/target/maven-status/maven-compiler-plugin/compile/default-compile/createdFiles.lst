@@ -5,11 +5,13 @@ com\ecommerce\controller\CartServlet.class
 com\ecommerce\util\DBConnection.class
 com\ecommerce\controller\TestServlet.class
 com\ecommerce\dao\CartDAO.class
+com\ecommerce\controller\ProfileServlet.class
 com\ecommerce\model\User.class
 com\ecommerce\controller\OrderServlet.class
 com\ecommerce\controller\LoginServlet.class
 com\ecommerce\model\Product.class
 com\ecommerce\dao\UserDAO.class
 com\ecommerce\model\CartItem.class
+com\ecommerce\controller\AuthCheckServlet.class
 com\ecommerce\controller\ProductServlet.class
 com\ecommerce\controller\RegisterServlet.class

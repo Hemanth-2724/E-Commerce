@@ -1,14 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import BASE_URL from "../api";
 
-function Login() {
-  const [email, setEmail] = useState("");
+export default function Login() {
+  const [email, setEmail]     = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const { addToast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     const formData = new URLSearchParams();
     formData.append("email", email);
@@ -20,36 +28,77 @@ function Login() {
         body: formData,
         credentials: "include",
       });
-      
-      // Mark user as authenticated and push to products
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/products");
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        login({ userId: data.userId, fullName: data.fullName, email: data.email });
+        addToast(`Welcome back, ${data.fullName}!`, "success");
+        navigate("/products");
+      } else {
+        setError(data.error || "Invalid email or password.");
+      }
     } catch (err) {
-      // Fallback for UI testing if backend isn't ready
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/products");
+      setError("Cannot reach server. Is Tomcat running?");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container" style={{ maxWidth: '450px', marginTop: '5rem' }}>
-      <div className="card">
-        <h2 className="text-center" style={{ marginBottom: '1.5rem', color: '#007bff' }}>Welcome Back</h2>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">LUXE</div>
+        <p className="auth-tagline">Curated fashion for the discerning</p>
+
+        {error && (
+          <div className="alert alert-error">
+            <span>⚠</span> {error}
+          </div>
+        )}
+
         <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <input className="form-control" type="email" placeholder="Email Address" required onChange={(e) => setEmail(e.target.value)} />
+          <div className="form-field">
+            <label className="form-label">Email Address</label>
+            <input
+              className="form-input"
+              type="email"
+              placeholder="your@email.com"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
           </div>
-          <div className="form-group">
-            <input className="form-control" type="password" placeholder="Password" required onChange={(e) => setPassword(e.target.value)} />
+
+          <div className="form-field">
+            <label className="form-label">Password</label>
+            <input
+              className="form-input"
+              type="password"
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Login</button>
+
+          <button
+            type="submit"
+            className="btn btn-gold btn-full"
+            disabled={loading}
+            style={{ marginTop: '0.5rem' }}
+          >
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
         </form>
-        <p className="text-center" style={{ marginTop: '1.5rem', color: '#666' }}>
-          Don't have an account? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none' }}>Register here</Link>
+
+        <div className="auth-divider">or</div>
+
+        <p style={{ textAlign: 'center', color: 'var(--text-2)', fontSize: '0.9rem' }}>
+          New to Luxe?{" "}
+          <Link to="/register" className="auth-link">Create an account</Link>
         </p>
       </div>
     </div>
   );
 }
-
-export default Login;

@@ -7,9 +7,14 @@ function OrderDetails() {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/checkout?orderId=${id}`)
-      .then(res => res.json())
-      .then(data => setItems(data))
+    fetch(`${BASE_URL}/checkout?orderId=${id}`, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) setItems(data);
+      })
       .catch(() => {
         setItems([{ productId: 1, quantity: 1, unitPrice: 2999 }, { productId: 3, quantity: 2, unitPrice: 1499 }]);
       });

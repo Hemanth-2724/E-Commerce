@@ -6,7 +6,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.annotation.MultipartConfig;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import com.ecommerce.dao.UserDAO;
 import com.ecommerce.model.User;
@@ -15,7 +16,6 @@ import com.ecommerce.model.User;
 @MultipartConfig
 public class LoginServlet extends HttpServlet {
 
-    // Helper method to setup CORS for React frontend
     private void setCorsHeaders(HttpServletResponse res) {
         res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
         res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
@@ -30,34 +30,30 @@ public class LoginServlet extends HttpServlet {
         res.setStatus(HttpServletResponse.SC_OK);
     }
 
-    // 👉 For browser testing (GET)
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         setCorsHeaders(res);
-
-        res.setContentType("text/html;charset=UTF-8");
-        res.getWriter().println("<h2>Login API is working ✅ (Use POST request)</h2>");
+        res.setContentType("application/json");
+        res.getWriter().print("{\"message\":\"Login API is up ✅\"}");
     }
 
-    // 👉 Actual login (POST)
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-
-        // Important for proper encoding
         req.setCharacterEncoding("UTF-8");
         setCorsHeaders(res);
+        res.setContentType("application/json;charset=UTF-8");
 
-        res.setContentType("text/plain;charset=UTF-8");
-        PrintWriter out = res.getWriter();
-
-        String email = req.getParameter("email");
+        String email    = req.getParameter("email");
         String password = req.getParameter("password");
 
-        // CHECK IF DATA IS NULL
+        JsonObject json = new JsonObject();
+
         if (email == null || password == null) {
-            out.println("Invalid Credentials ❌: 'email' or 'password' is null. If using Postman, select 'x-www-form-urlencoded'. DO NOT use raw JSON.");
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            json.addProperty("error", "Email and password are required.");
+            res.getWriter().print(json);
             return;
         }
 
@@ -65,14 +61,24 @@ public class LoginServlet extends HttpServlet {
         try {
             User user = dao.login(email, password);
             if (user != null) {
-                HttpSession session = req.getSession();
+                HttpSession session = req.getSession(true);
                 session.setAttribute("user", user);
-                out.println("Login Success ✅");
+                session.setMaxInactiveInterval(60 * 60 * 24); // 24 hours
+
+                json.addProperty("success", true);
+                json.addProperty("userId",   user.getUserId());
+                json.addProperty("fullName", user.getFullName());
+                json.addProperty("email",    user.getEmail());
+                res.getWriter().print(json);
             } else {
-                out.println("Invalid Credentials ❌ -> Incorrect email or password.");
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                json.addProperty("error", "Invalid email or password.");
+                res.getWriter().print(json);
             }
         } catch (Exception e) {
-            out.println("Login Error ❌ -> " + e.getMessage());
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            json.addProperty("error", "Server error: " + e.getMessage());
+            res.getWriter().print(json);
         }
     }
 }

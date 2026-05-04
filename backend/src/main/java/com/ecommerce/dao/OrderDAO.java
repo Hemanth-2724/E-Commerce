@@ -1,8 +1,6 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,105 +10,94 @@ import com.ecommerce.util.DBConnection;
 
 public class OrderDAO {
 
-    public boolean placeOrder(int userId, List<CartItem> items, double total) {
-        boolean status = false;
-
+    public boolean placeOrder(int userId, List<CartItem> items, double total,
+                               String paymentMethod, String deliveryAddress) {
         try {
             Connection conn = DBConnection.getConnection();
 
-            // Insert order
-            String orderSql = "INSERT INTO orders(user_id, total_amount, payment_method, order_status) VALUES(?,?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(orderSql, PreparedStatement.RETURN_GENERATED_KEYS);
-
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO orders(user_id, total_amount, payment_method, order_status, delivery_address) VALUES(?,?,?,?,?)",
+                PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, userId);
             ps.setDouble(2, total);
-            ps.setString(3, "COD");
+            ps.setString(3, paymentMethod);
             ps.setString(4, "Placed");
-
+            ps.setString(5, deliveryAddress);
             ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
-            int orderId = 0;
-            if (rs.next()) orderId = rs.getInt(1);
+            if (!rs.next()) return false;
+            int orderId = rs.getInt(1);
 
-            // Insert order items
             for (CartItem item : items) {
-                String itemSql = "INSERT INTO order_items(order_id, product_id, quantity, unit_price, subtotal) VALUES(?,?,?,?,?)";
-                PreparedStatement ps2 = conn.prepareStatement(itemSql);
-
+                PreparedStatement ps2 = conn.prepareStatement(
+                    "INSERT INTO order_items(order_id, product_id, product_name, quantity, unit_price, subtotal, size_label) VALUES(?,?,?,?,?,?,?)");
                 ps2.setInt(1, orderId);
                 ps2.setInt(2, item.getProductId());
-                ps2.setInt(3, item.getQuantity());
-                ps2.setDouble(4, item.getUnitPrice());
-                ps2.setDouble(5, item.getQuantity() * item.getUnitPrice());
-
+                ps2.setString(3, item.getProductName());
+                ps2.setInt(4, item.getQuantity());
+                ps2.setDouble(5, item.getUnitPrice());
+                ps2.setDouble(6, item.getSubtotal());
+                ps2.setString(7, item.getSizeLabel());
                 ps2.executeUpdate();
             }
-
-            status = true;
-
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return status;
     }
 
     public List<Order> getOrdersByUser(int userId) {
         List<Order> list = new ArrayList<>();
-
         try {
             Connection conn = DBConnection.getConnection();
-
-            String sql = "SELECT * FROM orders WHERE user_id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT * FROM orders WHERE user_id=? ORDER BY order_date DESC");
             ps.setInt(1, userId);
-
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 Order o = new Order();
                 o.setOrderId(rs.getInt("order_id"));
                 o.setTotalAmount(rs.getDouble("total_amount"));
                 o.setOrderStatus(rs.getString("order_status"));
                 o.setOrderDate(rs.getString("order_date"));
-
+                o.setPaymentMethod(rs.getString("payment_method"));
+                o.setDeliveryAddress(rs.getString("delivery_address"));
                 list.add(o);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
 
-    public List<CartItem> getOrderItems(int orderId) {
+    // FIX: verify the order belongs to the user before returning items
+    public List<CartItem> getOrderItems(int orderId, int userId) {
         List<CartItem> list = new ArrayList<>();
-
         try {
             Connection conn = DBConnection.getConnection();
-
-            String sql = "SELECT * FROM order_items WHERE order_id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT oi.*, p.image_url FROM order_items oi " +
+                "JOIN orders o ON oi.order_id = o.order_id " +
+                "LEFT JOIN products p ON oi.product_id = p.product_id " +
+                "WHERE oi.order_id=? AND o.user_id=?");
             ps.setInt(1, orderId);
-
+            ps.setInt(2, userId);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 CartItem item = new CartItem();
-
                 item.setProductId(rs.getInt("product_id"));
+                item.setProductName(rs.getString("product_name"));
                 item.setQuantity(rs.getInt("quantity"));
                 item.setUnitPrice(rs.getDouble("unit_price"));
-
+                item.setSizeLabel(rs.getString("size_label"));
+                item.setImageUrl(rs.getString("image_url"));
                 list.add(item);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
 }

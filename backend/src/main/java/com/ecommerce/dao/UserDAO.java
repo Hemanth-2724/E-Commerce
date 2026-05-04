@@ -1,26 +1,18 @@
 package com.ecommerce.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
+import java.sql.*;
 import com.ecommerce.model.User;
 import com.ecommerce.util.DBConnection;
 
 public class UserDAO {
 
-    // REGISTER
     public String register(User user) {
         try {
             Connection conn = DBConnection.getConnection();
-            if (conn == null) {
-                System.out.println("Database connection failed. Check DBConnection.java");
-                return "Database connection failed. Check DBConnection.java";
-            }
+            if (conn == null) return "Database connection failed.";
 
-            String sql = "INSERT INTO users(full_name, email, phone, password, gender, address) VALUES(?,?,?,?,?,?)";
-
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO users(full_name, email, phone, password, gender, address) VALUES(?,?,?,?,?,?)");
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
@@ -28,43 +20,65 @@ public class UserDAO {
             ps.setString(5, user.getGender());
             ps.setString(6, user.getAddress());
 
-            int row = ps.executeUpdate();
-
-            if (row > 0) {
-                return "SUCCESS";
-            }
-            return "Registration Failed: No rows inserted.";
+            return ps.executeUpdate() > 0 ? "SUCCESS" : "Registration failed: no rows inserted.";
         } catch (Exception e) {
-            System.out.println("Error during registration: " + e.getMessage());
             e.printStackTrace();
             return "DB Error: " + e.getMessage();
         }
     }
 
-    // LOGIN
     public User login(String email, String password) throws Exception {
-        User user = null;
-
         Connection conn = DBConnection.getConnection();
-        if (conn == null) {
-            System.out.println("Database connection failed. Check DBConnection.java");
-            throw new Exception("Database connection failed. Check DBConnection.java");
-        }
+        if (conn == null) throw new Exception("Database connection failed.");
 
-        String sql = "SELECT * FROM users WHERE email=? AND password=?";
-        PreparedStatement ps = conn.prepareStatement(sql);
+        PreparedStatement ps = conn.prepareStatement(
+            "SELECT * FROM users WHERE email=? AND password=?");
         ps.setString(1, email);
         ps.setString(2, password);
-
         ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            user = new User();
-            user.setUserId(rs.getInt("user_id"));
-            user.setFullName(rs.getString("full_name"));
-            user.setEmail(rs.getString("email"));
-        }
+        if (rs.next()) return mapUser(rs);
+        return null;
+    }
 
-        return user;
+    public User getUserById(int userId) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE user_id=?");
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return mapUser(rs);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateProfile(User user) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE users SET full_name=?, phone=?, gender=?, address=? WHERE user_id=?");
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhone());
+            ps.setString(3, user.getGender());
+            ps.setString(4, user.getAddress());
+            ps.setInt(5, user.getUserId());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        User u = new User();
+        u.setUserId(rs.getInt("user_id"));
+        u.setFullName(rs.getString("full_name"));
+        u.setEmail(rs.getString("email"));
+        u.setPhone(rs.getString("phone"));
+        u.setGender(rs.getString("gender"));
+        u.setAddress(rs.getString("address"));
+        return u;
     }
 }
