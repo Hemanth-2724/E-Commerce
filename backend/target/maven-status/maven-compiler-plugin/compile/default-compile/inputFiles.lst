@@ -1,0 +1,15 @@
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\CartServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\LoginServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\OrderServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\ProductServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\RegisterServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\controller\TestServlet.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\dao\CartDAO.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\dao\OrderDAO.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\dao\ProductDAO.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\dao\UserDAO.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\model\CartItem.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\model\Order.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\model\Product.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\model\User.java
+E:\EcommerceApp\backend\src\main\java\com\ecommerce\util\DBConnection.java
