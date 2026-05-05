@@ -118,6 +118,8 @@ export default function Profile() {
         @media (max-width: 768px) {
           .profile-layout { display: flex; flex-direction: column; gap: 2rem; }
           .profile-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
+          .profile-form-card { width: 100%; max-width: 450px; margin: 0 auto; }
+          .profile-form-card .btn { flex: 1; justify-content: center; }
           .profile-grid { display: flex; flex-direction: column; gap: 1rem; }
           .profile-stat { width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; }
           .profile-sidebar > div:last-child { width: 100%; max-width: 300px; margin-left: auto; margin-right: auto; }

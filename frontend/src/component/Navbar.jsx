@@ -9,10 +9,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
+    setIsMobileMenuOpen(false);
     try {
-      if (typeof logout === "function") {
-        await logout();
-      }
+      if (typeof logout === "function") await logout();
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -21,87 +20,315 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path ? "nav-link active" : "nav-link";
 
+  const closeMenu = () => setIsMobileMenuOpen(false);
+
   return (
-    <nav className="navbar">
-      <style>{`
-        .navbar { position: sticky; top: 0; z-index: 9999; background-color: var(--bg-1); }
-        .navbar-header { display: flex; align-items: center; position: relative; z-index: 1001; }
-        .navbar-links { position: relative; z-index: 1001; }
-        .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-1); padding: 0.5rem; }
-        @media (max-width: 768px) {
-          .navbar { padding: 1rem; border-bottom: 1px solid var(--border); background-color: var(--bg-1); }
-          .navbar-header { width: 100%; justify-content: space-between; }
-          .navbar-links { position: absolute; top: 100%; left: 0; right: 0; background-color: var(--bg-1); flex-direction: column; align-items: stretch; gap: 0.5rem; display: none; padding: 1.5rem; border-bottom: 1px solid var(--border); border-radius: 0 0 24px 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); z-index: 1001; }
-          .navbar-links.open { display: flex; animation: slideDown 0.2s ease-out forwards; }
-          .navbar-links a { width: 100%; padding: 1rem; border-radius: 12px; font-weight: 500; background-color: transparent; }
-          .navbar-links a:hover { background-color: var(--bg-2); }
-          .mobile-menu-btn { display: block; z-index: 1002; }
-          .nav-divider { display: none; }
-          .btn-ghost { width: 100%; justify-content: flex-start; padding: 1rem; margin-left: 0 !important; font-weight: 500; border-radius: 12px; background-color: transparent; }
-          .btn-ghost:hover { background-color: var(--bg-2); }
-        }
-        @keyframes letterReveal {
-          0% { opacity: 0; transform: translateY(8px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .letter-reveal {
-          display: inline-block;
-          opacity: 0;
-          animation: letterReveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-      `}</style>
-      
-      {isMobileMenuOpen && (
-        <div 
-          onClick={() => setIsMobileMenuOpen(false)}
-          style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 1000, animation: 'fadeIn 0.3s ease-out' }}
-        />
-      )}
-      
-      <div className="navbar-header">
-        <Link to="/products" className="navbar-brand" style={{ display: 'inline-flex' }}>
-          <div style={{ display: 'flex' }}>
+    <>
+      <nav className="navbar">
+        {/* Brand */}
+        <Link to="/products" className="navbar-brand" style={{ display: "inline-flex" }}>
+          <div style={{ display: "flex" }}>
             {"LUXE".split("").map((char, i) => (
-              <div key={`luxe-${i}`} className="letter-reveal" style={{ animationDelay: `${i * 0.06}s` }}>{char}</div>
+              <div key={`luxe-${i}`} className="letter-reveal" style={{ animationDelay: `${i * 0.06}s` }}>
+                {char}
+              </div>
             ))}
           </div>
-          <span style={{ display: 'flex' }}>
+          <span style={{ display: "flex" }}>
             {"FASHION".split("").map((char, i) => (
-              <div key={`fashion-${i}`} className="letter-reveal" style={{ animationDelay: `${(i + 4) * 0.06}s` }}>{char}</div>
+              <div key={`fashion-${i}`} className="letter-reveal" style={{ animationDelay: `${(i + 4) * 0.06}s` }}>
+                {char}
+              </div>
             ))}
           </span>
         </Link>
-        <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? "✕" : "☰"}
-        </button>
-      </div>
 
-      <div className={`navbar-links ${isMobileMenuOpen ? "open" : ""}`}>
-        <Link to="/products" className={isActive("/products")} onClick={() => setIsMobileMenuOpen(false)}>
-          <span>Collections</span>
-        </Link>
-        <Link to="/orders" className={isActive("/orders")} onClick={() => setIsMobileMenuOpen(false)}>
-          <span>Orders</span>
-        </Link>
-        <Link to="/profile" className={isActive("/profile")} onClick={() => setIsMobileMenuOpen(false)}>
-          <span>Profile</span>
-        </Link>
+        {/* Desktop Links */}
+        <div className="navbar-links">
+          <Link to="/products" className={isActive("/products")}>
+            <span>Collections</span>
+          </Link>
+          <Link to="/orders" className={isActive("/orders")}>
+            <span>Orders</span>
+          </Link>
+          <Link to="/profile" className={isActive("/profile")}>
+            <span>Profile</span>
+          </Link>
 
-        <div className="nav-divider" />
+          <div className="nav-divider" />
 
-        <Link to="/cart" className={`nav-cart ${isActive("/cart")}`} style={{ display: 'flex', alignItems: 'center', position: 'relative' }} onClick={() => setIsMobileMenuOpen(false)}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-          {cartCount > 0 && <span className="cart-badge">{cartCount > 9 ? '9+' : cartCount}</span>}
-        </Link>
+          <Link
+            to="/cart"
+            className={`nav-cart ${location.pathname === "/cart" ? "active" : ""}`}
+            style={{ display: "flex", alignItems: "center", position: "relative" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="cart-badge">{cartCount > 9 ? "9+" : cartCount}</span>
+            )}
+          </Link>
 
+          <button
+            onClick={handleLogout}
+            className="btn btn-ghost btn-sm"
+            style={{ marginLeft: "0.5rem" }}
+          >
+            Sign Out
+          </button>
+        </div>
+
+        {/* Hamburger button — mobile only */}
         <button
-          onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
-          className="btn btn-ghost btn-sm"
-          style={{ marginLeft: '0.5rem' }}
+          className="mobile-menu-btn"
+          onClick={() => setIsMobileMenuOpen((o) => !o)}
+          aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
         >
-          Sign Out
+          {isMobileMenuOpen ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
         </button>
+      </nav>
+
+      {/* ── MOBILE DRAWER ──────────────────────────────────── */}
+      {/* Overlay */}
+      <div
+        className={`mobile-overlay${isMobileMenuOpen ? " open" : ""}`}
+        onClick={closeMenu}
+      />
+
+      {/* Drawer */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          right: isMobileMenuOpen ? 0 : "-100%",
+          height: "100vh",
+          width: "min(320px, 85vw)",
+          background: "rgba(10, 10, 14, 0.98)",
+          backdropFilter: "blur(30px)",
+          WebkitBackdropFilter: "blur(30px)",
+          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          zIndex: 1200,
+          transition: "right 0.35s cubic-bezier(0.4,0,0.2,1)",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "-20px 0 60px rgba(0,0,0,0.5)",
+        }}
+      >
+        {/* Drawer header */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "1.2rem 1.5rem",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}>
+          <span style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "1.3rem",
+            fontWeight: 700,
+            color: "#e8b4a0",
+            letterSpacing: "0.1em",
+          }}>
+            LUXE
+          </span>
+          <button
+            onClick={closeMenu}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "8px",
+              color: "#8a879a",
+              cursor: "pointer",
+              padding: "0.35rem 0.55rem",
+              display: "flex",
+              alignItems: "center",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#e8b4a0"; e.currentTarget.style.borderColor = "rgba(232,180,160,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#8a879a"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {/* User info */}
+        {user && (
+          <div style={{
+            padding: "1.2rem 1.5rem",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(232,180,160,0.04)",
+          }}>
+            <div style={{
+              width: 40, height: 40,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(232,180,160,0.2), rgba(126,205,200,0.1))",
+              border: "1.5px solid rgba(232,180,160,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "1.2rem",
+              color: "#e8b4a0",
+              fontWeight: 600,
+              marginBottom: "0.6rem",
+            }}>
+              {user.fullName?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "#f0eef8" }}>{user.fullName}</div>
+            <div style={{ fontSize: "0.75rem", color: "#8a879a", marginTop: "0.1rem", wordBreak: "break-all" }}>{user.email}</div>
+          </div>
+        )}
+
+        {/* Nav links */}
+        <nav style={{ padding: "1rem 1rem", flex: 1 }}>
+          <div style={{ fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: "#4a4758", padding: "0.3rem 0.6rem 0.6rem", marginBottom: "0.2rem" }}>
+            Menu
+          </div>
+
+          {[
+            { to: "/products", label: "Collections", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
+            { to: "/orders",   label: "My Orders",   icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+            { to: "/profile",  label: "Profile",     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+          ].map(({ to, label, icon }) => {
+            const active = location.pathname === to;
+            return (
+              <Link
+                key={to}
+                to={to}
+                onClick={closeMenu}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.85rem",
+                  padding: "0.85rem 0.9rem",
+                  borderRadius: "12px",
+                  textDecoration: "none",
+                  color: active ? "#e8b4a0" : "#8a879a",
+                  background: active ? "rgba(232,180,160,0.08)" : "transparent",
+                  border: `1px solid ${active ? "rgba(232,180,160,0.2)" : "transparent"}`,
+                  fontWeight: active ? 600 : 500,
+                  fontSize: "0.92rem",
+                  marginBottom: "0.25rem",
+                  transition: "all 0.2s",
+                }}
+              >
+                <span style={{ color: active ? "#e8b4a0" : "#4a4758" }}>{icon}</span>
+                {label}
+                {active && (
+                  <span style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: "#e8b4a0" }} />
+                )}
+              </Link>
+            );
+          })}
+
+          {/* Cart */}
+          <Link
+            to="/cart"
+            onClick={closeMenu}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.85rem",
+              padding: "0.85rem 0.9rem",
+              borderRadius: "12px",
+              textDecoration: "none",
+              color: location.pathname === "/cart" ? "#e8b4a0" : "#8a879a",
+              background: location.pathname === "/cart" ? "rgba(232,180,160,0.08)" : "transparent",
+              border: `1px solid ${location.pathname === "/cart" ? "rgba(232,180,160,0.2)" : "transparent"}`,
+              fontWeight: location.pathname === "/cart" ? 600 : 500,
+              fontSize: "0.92rem",
+              marginBottom: "0.25rem",
+              transition: "all 0.2s",
+            }}
+          >
+            <span style={{ color: location.pathname === "/cart" ? "#e8b4a0" : "#4a4758" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </span>
+            Cart
+            {cartCount > 0 && (
+              <span style={{
+                marginLeft: "auto",
+                background: "#e8b4a0",
+                color: "#0a0a0b",
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                padding: "0.15rem 0.5rem",
+                borderRadius: "20px",
+                minWidth: "22px",
+                textAlign: "center",
+              }}>
+                {cartCount > 9 ? "9+" : cartCount}
+              </span>
+            )}
+          </Link>
+        </nav>
+
+        {/* Sign out */}
+        <div style={{
+          padding: "1rem 1.5rem 2rem",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+        }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.85rem",
+              padding: "0.85rem 0.9rem",
+              borderRadius: "12px",
+              background: "rgba(224,112,112,0.06)",
+              border: "1px solid rgba(224,112,112,0.18)",
+              color: "#e07070",
+              cursor: "pointer",
+              fontSize: "0.92rem",
+              fontWeight: 600,
+              fontFamily: "'Outfit', sans-serif",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(224,112,112,0.14)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(224,112,112,0.06)"; }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign Out
+          </button>
+        </div>
       </div>
-    </nav>
+
+      {/* Hide the desktop .navbar-links on mobile via inline media — the drawer handles mobile */}
+      <style>{`
+        @media (max-width: 768px) {
+          .navbar-links { display: none !important; }
+          .mobile-menu-btn { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-menu-btn { display: none !important; }
+          .mobile-overlay { display: none !important; }
+        }
+      `}</style>
+    </>
   );
 }

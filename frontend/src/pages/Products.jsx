@@ -63,7 +63,12 @@ export default function Products() {
 
       <div className="filter-bar">
         <div className="search-input-wrap">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <input
             className="search-input"
             placeholder="Search styles…"
@@ -84,7 +89,12 @@ export default function Products() {
 
       {filtered.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-icon">🔍</span>
+          <span className="empty-icon" style={{ display: 'inline-flex', marginBottom: '1rem', color: 'var(--text-3)' }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
           <h3>No results found</h3>
           <p>Try a different search or category filter.</p>
         </div>
