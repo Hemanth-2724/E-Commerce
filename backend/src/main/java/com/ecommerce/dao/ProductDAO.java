@@ -28,6 +28,9 @@ public class ProductDAO {
                 p.setDescription(rs.getString("description"));
                 p.setPrice(rs.getDouble("price"));
                 p.setImageUrl(rs.getString("image_url"));
+                p.setDiscountPercent(rs.getDouble("discount_percent"));
+                p.setCategoryId(rs.getInt("category_id"));
+                p.setGenderCategory(rs.getString("gender_category"));
 
                 list.add(p);
             }
@@ -57,6 +60,9 @@ public class ProductDAO {
             p.setDescription(rs.getString("description"));
             p.setPrice(rs.getDouble("price"));
             p.setImageUrl(rs.getString("image_url"));
+            p.setDiscountPercent(rs.getDouble("discount_percent"));
+            p.setCategoryId(rs.getInt("category_id"));
+            p.setGenderCategory(rs.getString("gender_category"));
         }
 
     } catch (Exception e) {

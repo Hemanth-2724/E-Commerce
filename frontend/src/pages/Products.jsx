@@ -17,23 +17,30 @@ export default function Products() {
       .catch(() => {
         // UI fallback
         setProducts([
-          { productId: 1, productName: "Floral Wrap Dress",   price: 1299, discountPercent: 10, description: "Elegant summer wrap dress with floral pattern.", imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400", categoryName: "Women" },
-          { productId: 2, productName: "Casual Denim Jacket", price: 1899, discountPercent: 15, description: "Classic blue denim jacket for everyday wear.",    imageUrl: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400", categoryName: "Women" },
-          { productId: 3, productName: "Slim Fit Chinos",     price: 999,  discountPercent: 5,  description: "Modern slim fit chino pants in neutral tones.", imageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400", categoryName: "Men"   },
-          { productId: 4, productName: "Oxford Button Shirt", price: 1199, discountPercent: 0,  description: "Classic oxford cotton shirt for refined look.",  imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400", categoryName: "Men"   },
-          { productId: 5, productName: "Maxi Boho Skirt",     price: 799,  discountPercent: 20, description: "Bohemian style maxi skirt with vibrant prints.", imageUrl: "https://images.unsplash.com/photo-1583496661160-fb5218afa9a7?w=400", categoryName: "Women" },
-          { productId: 6, productName: "Kids Printed Tee",    price: 399,  discountPercent: 0,  description: "Colorful printed t-shirt in soft cotton.",       imageUrl: "https://images.unsplash.com/photo-1519278409-1f56fdda7fe5?w=400", categoryName: "Kids"  },
+          { productId: 1, productName: "Floral Wrap Dress",   price: 1299, discountPercent: 10, description: "Elegant summer wrap dress with floral pattern.", imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400", categoryName: "Women", gender_category: "Women" },
+          { productId: 2, productName: "Casual Denim Jacket", price: 1899, discountPercent: 15, description: "Classic blue denim jacket for everyday wear.",    imageUrl: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400", categoryName: "Women", gender_category: "Women" },
+          { productId: 3, productName: "Slim Fit Chinos",     price: 999,  discountPercent: 5,  description: "Modern slim fit chino pants in neutral tones.", imageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400", categoryName: "Men", gender_category: "Men"   },
+          { productId: 4, productName: "Oxford Button Shirt", price: 1199, discountPercent: 0,  description: "Classic oxford cotton shirt for refined look.",  imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400", categoryName: "Men", gender_category: "Men"   },
+          { productId: 5, productName: "Maxi Boho Skirt",     price: 799,  discountPercent: 20, description: "Bohemian style maxi skirt with vibrant prints.", imageUrl: "https://images.unsplash.com/photo-1583496661160-fb5218afa9a7?w=400", categoryName: "Women", gender_category: "Women" },
+          { productId: 6, productName: "Kids Printed Tee",    price: 399,  discountPercent: 0,  description: "Colorful printed t-shirt in soft cotton.",       imageUrl: "https://images.unsplash.com/photo-1519278409-1f56fdda7fe5?w=400", categoryName: "Kids", gender_category: "Kids"  },
         ]);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const discounted = (p) => Math.round(p.price * (1 - (p.discountPercent || 0) / 100));
+  const discounted = (p) => Math.round((p.price || 0) * (1 - (p.discountPercent || p.discount_percent || 0) / 100));
 
   const filtered = products.filter(p => {
     const matchSearch = p.productName.toLowerCase().includes(search.toLowerCase()) ||
                         p.description?.toLowerCase().includes(search.toLowerCase());
-    const matchCat = category === "All" || (p.categoryName || "").includes(category);
+    
+    // Check both camelCase and snake_case in case the backend passes the raw DB column name
+    const pGender = p.genderCategory || p.gender_category;
+    const pCat = p.categoryName || p.category_name || "";
+    
+    const matchCat = category === "All" || 
+                     (pGender && pGender.toLowerCase() === category.toLowerCase()) || 
+                     pCat.toLowerCase().includes(category.toLowerCase());
     return matchSearch && matchCat;
   });
 
@@ -41,6 +48,14 @@ export default function Products() {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 768px) {
+          .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+          .filter-bar { flex-wrap: wrap; justify-content: flex-start; }
+          .search-input-wrap { width: 100%; flex: 1 1 100%; margin-bottom: 0.5rem; }
+          .filter-pill { flex-grow: 1; text-align: center; }
+        }
+      `}</style>
       <div style={{ marginBottom: '2rem' }}>
         <h1 className="page-title">Collections</h1>
         <p className="page-subtitle">Curated styles for every occasion</p>
@@ -75,22 +90,29 @@ export default function Products() {
         </div>
       ) : (
         <div className="product-grid">
-          {filtered.map(p => (
-            <Link to={`/product/${p.productId}`} key={p.productId} className="product-card">
+          {filtered.map(p => {
+            const pId = p.productId || p.product_id;
+            const pName = p.productName || p.product_name;
+            const pImage = p.imageUrl || p.image_url;
+            const pDiscount = p.discountPercent || p.discount_percent || 0;
+            const pCat = p.genderCategory || p.gender_category || p.categoryName || p.category_name;
+            
+            return (
+            <Link to={`/product/${pId}`} key={pId} className="product-card">
               <div className="product-card-img-wrap">
-                <img src={p.imageUrl} alt={p.productName} className="product-card-img" />
-                {p.discountPercent > 0 && (
-                  <span className="product-badge">-{p.discountPercent}%</span>
+                <img src={pImage} alt={pName} className="product-card-img" />
+                {pDiscount > 0 && (
+                  <span className="product-badge">-{pDiscount}%</span>
                 )}
               </div>
               <div className="product-card-body">
-                {p.categoryName && <div className="product-card-cat">{p.categoryName}</div>}
-                <h3 className="product-card-name">{p.productName}</h3>
+                {pCat && <div className="product-card-cat">{pCat}</div>}
+                <h3 className="product-card-name">{pName}</h3>
                 <p className="product-card-desc">{p.description?.substring(0, 65)}…</p>
                 <div className="product-card-footer">
                   <div>
                     <span className="product-price">₹{discounted(p)}</span>
-                    {p.discountPercent > 0 && (
+                    {pDiscount > 0 && (
                       <span className="product-original-price">₹{p.price}</span>
                     )}
                   </div>
@@ -98,7 +120,7 @@ export default function Products() {
                 </div>
               </div>
             </Link>
-          ))}
+          )})}
         </div>
       )}
     </>

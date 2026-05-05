@@ -22,4 +22,17 @@ public class Product {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    private String genderCategory;
+    private double discountPercent;
+    private int categoryId;
+
+    public String getGenderCategory() { return genderCategory; }
+    public void setGenderCategory(String genderCategory) { this.genderCategory = genderCategory; }
+
+    public double getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(double discountPercent) { this.discountPercent = discountPercent; }
+
+    public int getCategoryId() { return categoryId; }
+    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
 }

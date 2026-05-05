@@ -100,4 +100,33 @@ public class OrderDAO {
         }
         return list;
     }
+
+    public boolean cancelOrder(int orderId, int userId) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE orders SET order_status = 'Cancelled' WHERE order_id = ? AND user_id = ? AND order_status IN ('Placed', 'Pending')");
+            ps.setInt(1, orderId);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateOrderAddress(int orderId, int userId, String newAddress) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE orders SET delivery_address = ? WHERE order_id = ? AND user_id = ? AND order_status IN ('Placed', 'Pending')");
+            ps.setString(1, newAddress);
+            ps.setInt(2, orderId);
+            ps.setInt(3, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

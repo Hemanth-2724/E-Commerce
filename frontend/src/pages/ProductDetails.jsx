@@ -20,25 +20,31 @@ export default function ProductDetails() {
   const [size, setSize]         = useState("");
   const [adding, setAdding]     = useState(false);
   const [qty, setQty]           = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [zoomedImage, setZoomedImage] = useState(null);
 
   useEffect(() => {
     fetch(`${BASE_URL}/products?id=${id}`)
       .then(r => r.json())
-      .then(p => { setProduct(p); setLoading(false); })
+      .then(data => {
+        const p = Array.isArray(data) ? data[0] : data;
+        setProduct(p);
+        setLoading(false);
+      })
       .catch(() => {
         setProduct({ productId: id, productName: "Premium Product", price: 2999, discountPercent: 10, description: "An incredible premium product with top-tier craftsmanship and high-quality materials. Designed for the modern individual who appreciates style and comfort.", imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600", categoryName: "Women" });
         setLoading(false);
       });
   }, [id]);
 
-  const discounted = (p) => Math.round(p.price * (1 - (p.discountPercent || 0) / 100));
+  const discounted = (p) => Math.round((p.price || 0) * (1 - (p.discountPercent || p.discount_percent || 0) / 100));
 
   const addToCart = async () => {
     if (!size) { addToast("Please select a size", "error"); return; }
     setAdding(true);
 
     const formData = new URLSearchParams();
-    formData.append("productId", product.productId);
+    formData.append("productId", product.productId || product.product_id);
     formData.append("quantity",  qty);
     formData.append("price",     discounted(product));
     formData.append("sizeLabel", size);
@@ -75,36 +81,96 @@ export default function ProductDetails() {
   if (loading) return <span className="spinner" />;
   if (!product) return <div className="empty-state"><h3>Product not found</h3></div>;
 
-  const finalPrice    = discounted(product);
-  const savings       = product.price - finalPrice;
-  const sizes         = product.productName?.toLowerCase().includes("chino") || product.productName?.toLowerCase().includes("jean")
+  const pName = product.productName || product.product_name || "Product";
+  const pImage = product.imageUrl || product.image_url;
+  const pCat = product.categoryName || product.category_name;
+  const pPrice = product.price || 0;
+
+  const finalPrice    = discounted(product) || 0;
+  const savings       = pPrice - finalPrice;
+  const sizes         = pName.toLowerCase().includes("chino") || pName.toLowerCase().includes("jean")
                           ? SIZES_BY_CATEGORY.pants
                           : SIZES_BY_CATEGORY.clothing;
+  
+  // Mock a gallery by providing a few additional images if none exist
+  const images = [
+    pImage,
+    product.image2Url || pImage,
+    product.image3Url || pImage,
+  ];
+
+  const handleScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.offsetWidth || 1;
+    const newIndex = Math.round(scrollLeft / width);
+    if (newIndex !== activeImageIndex) {
+      setActiveImageIndex(newIndex);
+    }
+  };
 
   return (
     <>
+      <style>{`
+        @keyframes zoomIn {
+          0% { opacity: 0; transform: scale(0.95); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .gallery-container {
+          display: flex;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          gap: 1rem;
+        }
+        .gallery-container::-webkit-scrollbar {
+          display: none;
+        }
+        .gallery-item {
+          flex: 0 0 100%;
+          scroll-snap-align: start;
+        }
+        .detail-img { width: 100%; height: auto; border-radius: 12px; object-fit: cover; }
+        .gallery-indicator { display: none; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+        .gallery-indicator .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); transition: background 0.3s; }
+        .gallery-indicator .dot.active { background: var(--rose); }
+        @media (max-width: 768px) {
+          .detail-layout { display: flex; flex-direction: column; gap: 2rem; }
+          .detail-img { max-height: 500px; }
+          .gallery-indicator { display: flex; }
+        }
+      `}</style>
       <div className="breadcrumb">
         <Link to="/products">Collections</Link>
         <span className="breadcrumb-sep">›</span>
-        {product.categoryName && <><span>{product.categoryName}</span><span className="breadcrumb-sep">›</span></>}
-        <span style={{ color: 'var(--text)' }}>{product.productName}</span>
+        {pCat && <><span>{pCat}</span><span className="breadcrumb-sep">›</span></>}
+        <span style={{ color: 'var(--text)' }}>{pName}</span>
       </div>
 
       <div className="detail-layout">
-        <div>
-          <img src={product.imageUrl} alt={product.productName} className="detail-img" />
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
+          <div className="gallery-container" onScroll={handleScroll}>
+            {images.map((src, i) => (
+              <div key={i} className="gallery-item">
+                <img src={src} alt={`${pName} - ${i + 1}`} className="detail-img" style={{ cursor: 'zoom-in' }} onClick={() => setZoomedImage(src)} />
+              </div>
+            ))}
+          </div>
+          <div className="gallery-indicator">
+            {images.map((_, i) => <div key={i} className={`dot ${i === activeImageIndex ? 'active' : ''}`} />)}
+          </div>
         </div>
 
         <div>
-          {product.categoryName && <div className="detail-cat">{product.categoryName}</div>}
-          <h1 className="detail-name">{product.productName}</h1>
+          {pCat && <div className="detail-cat">{pCat}</div>}
+          <h1 className="detail-name">{pName}</h1>
           <p className="detail-desc">{product.description}</p>
 
           <div className="detail-price-row">
             <span className="detail-price">₹{finalPrice}</span>
-            {product.discountPercent > 0 && (
+            {savings > 0 && (
               <>
-                <span className="detail-original">₹{product.price}</span>
+                <span className="detail-original">₹{pPrice}</span>
                 <span style={{ background: 'var(--gold-dim)', color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '20px' }}>
                   Save ₹{savings}
                 </span>
@@ -157,6 +223,26 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
+
+      {zoomedImage && (
+        <div 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out', animation: 'fadeIn 0.2s ease-out' }}
+          onClick={() => setZoomedImage(null)}
+        >
+          <button 
+            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: '#fff', fontSize: '2.5rem', cursor: 'pointer', zIndex: 10000, lineHeight: 1 }}
+            onClick={() => setZoomedImage(null)}
+          >
+            ×
+          </button>
+          <img 
+            src={zoomedImage} 
+            alt="Zoomed Product" 
+            style={{ maxWidth: '95%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.3)', animation: 'zoomIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }} 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }

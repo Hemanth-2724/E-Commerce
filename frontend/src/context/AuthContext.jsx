@@ -49,10 +49,15 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await fetch(`${BASE_URL}/logout`, { method: "POST", credentials: "include" });
-    setUser(null);
-    setCartCount(0);
-    localStorage.removeItem("user");
+    try {
+      await fetch(`${BASE_URL}/logout`, { method: "POST", credentials: "include" });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      setUser(null);
+      setCartCount(0);
+      localStorage.removeItem("user");
+    }
   };
 
   return (
