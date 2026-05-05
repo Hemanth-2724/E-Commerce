@@ -14,25 +14,48 @@ import com.ecommerce.model.User;
 @MultipartConfig
 public class RegisterServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException {
-        res.setContentType("application/json");
-        res.getWriter().print("{\"message\":\"Register API is up\"}");
+    // Helper method to setup CORS for React frontend
+    private void setCorsHeaders(HttpServletResponse res) {
+        res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
     }
 
     @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    // ✅ FOR BROWSER TESTING
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+
+        res.setContentType("text/html");
+        res.getWriter().println("<h2>Register API is working ✅ (Use POST request)</h2>");
+    }
+
+    // ✅ ACTUAL REGISTER LOGIC
+    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");
-        res.setContentType("application/json;charset=UTF-8");
 
-        String email    = req.getParameter("email");
+        // 🔥 IMPORTANT (must be FIRST line inside doPost)
+        req.setCharacterEncoding("UTF-8");
+        setCorsHeaders(res);
+
+        res.setContentType("text/plain");
+
+        String email = req.getParameter("email");
         String password = req.getParameter("password");
 
+        // CHECK IF DATA IS NULL (Means Postman is sending raw JSON instead of form data)
         if (email == null || password == null) {
-            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            res.getWriter().print("{\"error\":\"Email and password are required.\"}");
+            res.getWriter().println("Registration Failed ❌: 'email' or 'password' is null. If using Postman, select 'x-www-form-urlencoded'. DO NOT use raw JSON.");
             return;
         }
 
@@ -48,10 +71,10 @@ public class RegisterServlet extends HttpServlet {
         String status = dao.register(user);
 
         if ("SUCCESS".equals(status)) {
-            res.getWriter().print("{\"success\":true,\"message\":\"Registration Successful\"}");
+            res.getWriter().println("Registration Successful ✅");
         } else {
-            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            res.getWriter().print("{\"error\":\"" + status.replace("\"", "'") + "\"}");
+            // Will print the EXACT database error to Postman
+            res.getWriter().println("Registration Failed ❌ -> " + status);
         }
     }
 }

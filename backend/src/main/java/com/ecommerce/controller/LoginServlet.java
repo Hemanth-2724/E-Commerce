@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.annotation.MultipartConfig;
 
 import java.io.IOException;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import com.ecommerce.dao.UserDAO;
@@ -15,17 +16,33 @@ import com.ecommerce.model.User;
 @MultipartConfig
 public class LoginServlet extends HttpServlet {
 
+    private void setCorsHeaders(HttpServletResponse res) {
+        res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+
+    @Override
+    protected void doOptions(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        setCorsHeaders(res);
+        res.setStatus(HttpServletResponse.SC_OK);
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+        setCorsHeaders(res);
         res.setContentType("application/json");
-        res.getWriter().print("{\"message\":\"Login API is up\"}");
+        res.getWriter().print("{\"message\":\"Login API is up ✅\"}");
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
+        setCorsHeaders(res);
         res.setContentType("application/json;charset=UTF-8");
 
         String email    = req.getParameter("email");
@@ -48,7 +65,7 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("user", user);
                 session.setMaxInactiveInterval(60 * 60 * 24); // 24 hours
 
-                json.addProperty("success",  true);
+                json.addProperty("success", true);
                 json.addProperty("userId",   user.getUserId());
                 json.addProperty("fullName", user.getFullName());
                 json.addProperty("email",    user.getEmail());
