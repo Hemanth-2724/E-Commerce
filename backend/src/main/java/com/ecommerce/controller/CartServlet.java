@@ -15,25 +15,10 @@ import com.ecommerce.model.CartItem;
 @WebServlet("/cart")
 public class CartServlet extends HttpServlet {
 
-    private void setCorsHeaders(HttpServletResponse res) {
-        res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-        res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        res.setHeader("Access-Control-Allow-Credentials", "true");
-    }
-
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException {
-        setCorsHeaders(res);
-        res.setStatus(HttpServletResponse.SC_OK);
-    }
-
-    // GET /cart  → return cart items for logged-in user
+    // GET /cart → return cart items for logged-in user
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        setCorsHeaders(res);
         res.setContentType("application/json;charset=UTF-8");
 
         HttpSession session = req.getSession(false);
@@ -46,16 +31,13 @@ public class CartServlet extends HttpServlet {
         User user = (User) session.getAttribute("user");
         CartDAO dao = new CartDAO();
         List<CartItem> items = dao.getCartItems(user.getUserId());
-
-        System.out.println("[CartServlet] GET cart for userId=" + user.getUserId() + " → " + items.size() + " items");
         res.getWriter().print(new Gson().toJson(items));
     }
 
-    // POST /cart  → add item
+    // POST /cart → add item
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        setCorsHeaders(res);
         res.setContentType("application/json;charset=UTF-8");
 
         HttpSession session = req.getSession(false);
@@ -69,7 +51,8 @@ public class CartServlet extends HttpServlet {
             String productIdParam = req.getParameter("productId");
             String quantityParam  = req.getParameter("quantity");
             String priceParam     = req.getParameter("price");
-            String sizeLabel      = req.getParameter("sizeLabel") != null ? req.getParameter("sizeLabel") : "FREE";
+            String sizeLabel      = req.getParameter("sizeLabel") != null
+                    ? req.getParameter("sizeLabel") : "FREE";
 
             if (productIdParam == null || quantityParam == null || priceParam == null) {
                 res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -98,11 +81,10 @@ public class CartServlet extends HttpServlet {
         }
     }
 
-    // DELETE /cart?itemId=X  → remove specific item
+    // DELETE /cart?itemId=X → remove specific item
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        setCorsHeaders(res);
         res.setContentType("application/json;charset=UTF-8");
 
         HttpSession session = req.getSession(false);
