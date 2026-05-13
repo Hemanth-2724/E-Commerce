@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import ProtectedRoute from "./component/ProtectedRoute";
@@ -17,11 +17,14 @@ function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Login />} />
+            {/* Default: go to products */}
+            <Route path="/" element={<Navigate to="/products" replace />} />
+
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
-            {/* Public/Semi-Public Routes */}
+
+            {/* Public Routes */}
             <Route path="/products" element={<Products />} />
             <Route path="/product/:id" element={<ProductDetails />} />
 
