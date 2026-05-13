@@ -14,17 +14,23 @@ export default function Products() {
   useEffect(() => {
     fetch(`${BASE_URL}/products`)
       .then(r => r.json())
-      .then(data => setProducts(data))
+      .then(data => {
+        // Shuffle the array for random order on each load
+        const shuffled = data.sort(() => Math.random() - 0.5);
+        setProducts(shuffled);
+      })
       .catch(() => {
         // UI fallback
-        setProducts([
+        const fallbackData = [
           { productId: 1, productName: "Floral Wrap Dress",   price: 1299, discountPercent: 10, description: "Elegant summer wrap dress with floral pattern.", imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400", categoryName: "Women", gender_category: "Women" },
           { productId: 2, productName: "Casual Denim Jacket", price: 1899, discountPercent: 15, description: "Classic blue denim jacket for everyday wear.",    imageUrl: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400", categoryName: "Women", gender_category: "Women" },
           { productId: 3, productName: "Slim Fit Chinos",     price: 999,  discountPercent: 5,  description: "Modern slim fit chino pants in neutral tones.", imageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400", categoryName: "Men", gender_category: "Men"   },
           { productId: 4, productName: "Oxford Button Shirt", price: 1199, discountPercent: 0,  description: "Classic oxford cotton shirt for refined look.",  imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400", categoryName: "Men", gender_category: "Men"   },
           { productId: 5, productName: "Maxi Boho Skirt",     price: 799,  discountPercent: 20, description: "Bohemian style maxi skirt with vibrant prints.", imageUrl: "https://images.unsplash.com/photo-1583496661160-fb5218afa9a7?w=400", categoryName: "Women", gender_category: "Women" },
           { productId: 6, productName: "Kids Printed Tee",    price: 399,  discountPercent: 0,  description: "Colorful printed t-shirt in soft cotton.",       imageUrl: "https://images.unsplash.com/photo-1519278409-1f56fdda7fe5?w=400", categoryName: "Kids", gender_category: "Kids"  },
-        ]);
+        ];
+        const shuffledFallback = fallbackData.sort(() => Math.random() - 0.5);
+        setProducts(shuffledFallback);
       })
       .finally(() => setLoading(false));
   }, []);

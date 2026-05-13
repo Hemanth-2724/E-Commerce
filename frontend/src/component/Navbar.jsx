@@ -47,6 +47,12 @@ export default function Navbar() {
           <Link to="/products" className={isActive("/products")}>
             <span>Collections</span>
           </Link>
+
+          {/* Categories — visible to everyone */}
+          <Link to="/categories" className={isActive("/categories")}>
+            <span>Categories</span>
+          </Link>
+
           {user && (
             <>
               <Link to="/orders" className={isActive("/orders")}>
@@ -82,7 +88,6 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {/* ── Guest buttons ── */}
               <Link to="/login" className="btn btn-ghost btn-sm" style={{ marginLeft: "0.5rem" }}>
                 Sign In
               </Link>
@@ -163,7 +168,16 @@ export default function Navbar() {
           </div>
 
           {[
-            { to: "/products", label: "Collections", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
+            {
+              to: "/products",
+              label: "Collections",
+              icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            },
+            {
+              to: "/categories",
+              label: "Categories",
+              icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            },
             ...(user ? [
               { to: "/orders",  label: "My Orders", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
               { to: "/profile", label: "Profile",    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
@@ -207,7 +221,6 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-          /* Guest bottom buttons */
           <div style={{ padding: "1rem 1.5rem 2rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: "0.5rem" }}>
             <Link to="/login" className="btn btn-ghost" style={{ flex: 1, justifyContent: "center" }} onClick={closeMenu}>
               Sign In
