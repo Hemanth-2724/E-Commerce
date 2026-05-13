@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import BASE_URL from "../api";
+import Navbar from "../component/Navbar";
 
 const SIZES_BY_CATEGORY = {
   clothing: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -13,7 +14,7 @@ const SIZES_BY_CATEGORY = {
 export default function ProductDetails() {
   const { id }   = useParams();
   const navigate = useNavigate();
-  const { refreshCartCount } = useAuth();
+  const { user, refreshCartCount } = useAuth();
   const { addToast } = useToast();
   const [product, setProduct]   = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -40,6 +41,11 @@ export default function ProductDetails() {
   const discounted = (p) => Math.round((p.price || 0) * (1 - (p.discountPercent || p.discount_percent || 0) / 100));
 
   const addToCart = async () => {
+    if (!user) {
+      addToast("Please sign in to add items to your cart", "error");
+      navigate("/");
+      return;
+    }
     if (!size) { addToast("Please select a size", "error"); return; }
     setAdding(true);
 
@@ -110,6 +116,8 @@ export default function ProductDetails() {
 
   return (
     <>
+      <Navbar />
+      <div className="page-wrapper page-enter">
       <style>{`
         @keyframes zoomIn {
           0% { opacity: 0; transform: scale(0.95); }
@@ -222,6 +230,7 @@ export default function ProductDetails() {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {zoomedImage && (

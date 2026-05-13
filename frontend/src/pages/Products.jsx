@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import BASE_URL from "../api";
+import Navbar from "../component/Navbar";
 
 const CATEGORIES = ["All", "Women", "Men", "Kids", "Accessories"];
 
@@ -48,6 +49,8 @@ export default function Products() {
 
   return (
     <>
+      <Navbar />
+      <div className="page-wrapper page-enter">
       <style>{`
         @media (max-width: 768px) {
           .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
@@ -133,6 +136,7 @@ export default function Products() {
           )})}
         </div>
       )}
+      </div>
     </>
   );
 }
